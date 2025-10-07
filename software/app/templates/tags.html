@@ -1,0 +1,79 @@
+<!-- SPDX-License-Identifier: LicenseRef-TVArgenta-NC-Attribution-Consult-First
+     Proyecto: TVArgenta — Retro TV | Autor: Ricardo Sappia (rsflightronics@gmail.com)
+     © 2025. No comercial, atribución y consulta previa. TAL CUAL, sin garantías.
+     Ver LICENSE para términos completos.
+-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Administrar tags</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white font-mono min-h-screen">
+  <div class="max-w-3xl mx-auto py-10 px-6">
+    <h1 class="text-3xl font-bold text-yellow-400 mb-6 text-center">🏷 Administrar Tags y Grupos</h1>
+
+    <!-- FORMULARIO NUEVO GRUPO -->
+    <form action="/add_group" method="post" class="mb-8 bg-gray-800 p-4 rounded border border-yellow-500">
+      <h2 class="text-xl font-bold text-yellow-300 mb-2">➕ Crear nuevo grupo</h2>
+      <div class="flex gap-4 items-center">
+        <input type="text" name="group" placeholder="Nombre del grupo" class="px-3 py-1 rounded bg-gray-900 text-white w-1/2">
+        <input type="color" name="color" class="w-10 h-10 border-2 border-white rounded">
+        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded">Crear grupo</button>
+      </div>
+    </form>
+
+    <!-- FORMULARIO NUEVO TAG -->
+    <form action="/add_tag" method="post" class="mb-12 bg-gray-800 p-4 rounded border border-yellow-500">
+      <h2 class="text-xl font-bold text-yellow-300 mb-2">➕ Agregar nuevo tag</h2>
+      <div class="flex flex-col md:flex-row gap-4">
+        <input type="text" name="tag" placeholder="Nombre del tag" class="px-3 py-1 rounded bg-gray-900 text-white w-full md:w-1/2">
+        <select name="group" class="px-2 py-1 rounded bg-gray-900 text-white border border-gray-500">
+          {% for group, info in tags.items() %}
+            <option value="{{ group }}">{{ group }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded">Agregar tag</button>
+      </div>
+    </form>
+
+	<!-- GRUPOS EXISTENTES Y SUS TAGS -->
+	{% for group, info in tags.items() %}
+	<div class="mb-10 bg-gray-900 p-4 rounded border-l-4" style="border-color: {{ info.color }};">
+	  <div class="flex justify-between items-center mb-2">
+		<h2 class="text-xl font-bold" style="color: {{ info.color }}">{{ group }}</h2>
+		<form method="POST" action="{{ url_for('delete_group') }}" class="inline"
+			  onsubmit="return confirm('¿Estás seguro de que querés eliminar todo el grupo {{ group }} y sus tags del sistema?')">
+		  <input type="hidden" name="group" value="{{ group }}">
+		  <input type="hidden" name="from_edit" value="{{ request.args.get('from_edit', '') }}">
+		  <button type="submit" class="text-red-400 text-xs hover:underline">🗑 Eliminar grupo</button>
+		</form>
+	  </div>
+	  <ul class="flex flex-wrap gap-2">
+		{% for tag in info.tags %}
+		<li class="bg-white text-black px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2">
+		  {{ tag }}
+		  <form action="/delete_tag" method="post" class="inline">
+			<input type="hidden" name="tag" value="{{ tag }}">
+			<input type="hidden" name="group" value="{{ group }}">
+			<input type="hidden" name="from_edit" value="{{ request.args.get('from_edit', '') }}">
+			<button type="submit" title="Eliminar" class="text-red-500 font-bold">×</button>
+		  </form>
+		</li>
+		{% endfor %}
+	  </ul>
+	</div>
+	{% endfor %}
+
+    <div class="text-center mt-10">
+		{% if return_to %}
+		  <a href="{{ url_for('edit_video', video_id=return_to) }}" class="text-blue-400 underline">⬅ Volver a la edición</a>
+		{% else %}
+		  <a href="{{ url_for('index') }}" class="text-blue-400 underline">⬅ Volver al inicio</a>
+		{% endif %}
+    </div>
+  </div>
+</body>
+</html>

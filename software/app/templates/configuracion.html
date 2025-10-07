@@ -1,0 +1,107 @@
+<!-- SPDX-License-Identifier: LicenseRef-TVArgenta-NC-Attribution-Consult-First
+     Proyecto: TVArgenta — Retro TV | Autor: Ricardo Sappia (rsflightronics@gmail.com)
+     © 2025. No comercial, atribución y consulta previa. TAL CUAL, sin garantías.
+     Ver LICENSE para términos completos.
+-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Configuración TVArgenta</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <style>
+    .tag-pill {
+      display: inline-block;
+      margin: 0.25rem;
+      padding: 0.5rem 1rem;
+      background-color: white;
+      color: black;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: move;
+    }
+  </style>
+</head>
+<body class="bg-black text-white min-h-screen font-mono p-6">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl text-yellow-400 font-bold mb-6 text-center">⚙️ Configuración de TVArgenta</h1>
+
+    <form action="/guardar_configuracion" method="post" class="space-y-10">
+
+      <!-- Prioridad de tags -->
+      <div>
+        <h2 class="text-xl font-bold text-blue-400 mb-2">🏷 Orden de prioridad de tags</h2>
+        <p class="text-sm text-gray-400 mb-4">Arrastrá para establecer el orden de prioridad. El primer tag tiene mayor importancia.</p>
+        <ul id="tags-prioridad" class="min-h-[50px] flex flex-wrap gap-2 p-3 bg-gray-800 border border-blue-500 rounded">
+          {% for tag in config.tags_prioridad %}
+            {% if tag in config.tags_incluidos %}
+            <li class="tag-pill" data-value="{{ tag }}">{{ tag }}</li>
+            {% endif %}
+          {% endfor %}
+          {% for grupo, info in tags.items() %}
+            {% for tag in info.tags %}
+              {% if tag not in config.tags_prioridad and tag in config.tags_incluidos %}
+              <li class="tag-pill" data-value="{{ tag }}">{{ tag }}</li>
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+        </ul>
+        <input type="hidden" name="tags_prioridad" id="tags-prioridad-input">
+      </div>
+
+      <!-- Tags excluidos -->
+      <div>
+        <h2 class="text-xl font-bold text-red-400 mb-2">🚫 Tags excluidos</h2>
+        <p class="text-sm text-gray-400 mb-4">Destildá los tags que NO querés que se usen. Los tags desmarcados también serán eliminados del orden de prioridad.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {% for grupo, info in tags.items() %}
+          <div>
+            <h3 class="text-sm font-bold mb-1" style="color: {{ info.color }}">{{ grupo }}</h3>
+            <div class="bg-gray-800 border border-gray-600 p-3 rounded">
+              {% for tag in info.tags %}
+              <label class="flex items-center text-sm gap-2 mb-2">
+                <input type="checkbox" name="tags_incluidos" value="{{ tag }}"
+                       {% if tag in config.tags_incluidos %}checked{% endif %}
+                       class="accent-yellow-400">
+                <span>{{ tag }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded font-bold">💾 Guardar configuración</button>
+      </div>
+    </form>
+
+    <div class="mt-10 text-center">
+      <a href="{{ url_for('index') }}" class="text-blue-400 underline">⬅ Volver al inicio</a>
+    </div>
+  </div>
+
+  <script>
+    new Sortable(document.getElementById('tags-prioridad'), {
+      animation: 150,
+      onSort: updateTagOrder
+    });
+
+    function updateTagOrder() {
+      const items = document.querySelectorAll('#tags-prioridad li');
+      const order = [...items].map(el => el.dataset.value);
+      document.getElementById('tags-prioridad-input').value = order.join(',');
+    }
+
+    // Actualiza antes de enviar el formulario
+    document.querySelector("form").addEventListener("submit", updateTagOrder);
+
+    // Ejecutar al inicio
+    updateTagOrder();
+  </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!-- SPDX-License-Identifier: LicenseRef-TVArgenta-NC-Attribution-Consult-First
+     Proyecto: TVArgenta — Retro TV | Autor: Ricardo Sappia (rsflightronics@gmail.com)
+     © 2025. No comercial, atribución y consulta previa. TAL CUAL, sin garantías.
+     Ver LICENSE para términos completos.
+-->
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Intro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- Fallback definitivo: aunque JS no corra, a los 9s pasa a /tv -->
+  <meta http-equiv="refresh" content="9;url=/tv">
+  <style>
+    html,body { margin:0; background:#000; height:100%; overflow:hidden; }
+    video { position:fixed; inset:0; width:100%; height:100%; object-fit:cover; }
+    .skip { position:fixed; right:55px; bottom:35px; padding:6px 10px;
+            background:rgba(0,0,0,.5); color:#fff; font-family:monospace;
+            border:1px solid #fff; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <!-- Tip: arrancar muted para que el autoplay SIEMPRE dispare; desmuteamos en 'playing' -->
+  <video id="v" autoplay muted playsinline preload="auto" poster="">
+    <source src="{{ video_url }}?v={{ '%d'|format((range(1)|length)) }}" type="video/mp4">
+  </video>
+  <button class="skip" onclick="cleanupAndGo()">Saltar intro</button>
+
+<script>
+  const v = document.getElementById('v');
+
+  // --- PING watchdog ---
+	async function pingBackend(stage="boot") {
+	  try {
+		await fetch("/api/ping", {
+		  method: "POST",
+		  headers: { "Content-Type": "application/json" },
+		  body: JSON.stringify({ stage })
+		});
+	  } catch (e) {}
+	}
+
+	window.addEventListener("load", () => {
+	  pingBackend("boot");
+	});
+
+	v.addEventListener("playing", () => {
+	  pingBackend("playing");
+	});
+
+
+  async function clearIntroFlag() {
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon("{{ url_for('api_clear_intro') }}");
+      } else {
+        fetch("{{ url_for('api_clear_intro') }}", { method: "POST", keepalive: true });
+      }
+    } catch(e) {}
+  }
+
+  function goTV() { window.location.replace("{{ tv_url }}"); }
+
+  function cleanupAndGo() {
+    try {
+      v.pause();
+      v.removeAttribute('src'); v.load();
+    } catch(e) {}
+    clearIntroFlag();
+    setTimeout(goTV, 400);  // colchón corto
+  }
+
+  // Failsafe principal con JS
+  let failsafe = setTimeout(cleanupAndGo, 8000);
+
+  document.querySelector('.skip').addEventListener('click', () => {
+    clearTimeout(failsafe);
+    cleanupAndGo();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.code === 'Enter') {
+      clearTimeout(failsafe);
+      cleanupAndGo();
+    }
+  });
+
+  // Autoplay robusto: iniciar muted para que arranque sí o sí y desmutear enseguida
+  async function boot() {
+    try {
+      v.muted = true;
+      await v.play().catch(()=>{});
+      // pequeño delay y desmuteo para que se escuche el splash
+      setTimeout(()=>{ try { v.muted = false; } catch(e){} }, 200);
+    } catch(e) {
+      // si igual falla, el failsafe nos salva
+    }
+  }
+
+  v.addEventListener('ended', () => cleanupAndGo());
+  window.addEventListener('load', boot);
+ 
+	// 1) disparo inmediato
+	fetch("/api/kiosk_ping?src=splash", {method:"POST", keepalive:true}).catch(()=>{});
+	// 2) heartbeat cada 2s
+	setInterval(()=>{ navigator.sendBeacon("/api/kiosk_ping?src=splash"); }, 2000);
+ 
+  (function bootProbe(){
+    try {
+      const url = "/api/boot_probe";
+      const payload = JSON.stringify({ stage: "splash_loaded" });
+      if (navigator.sendBeacon) {
+        const blob = new Blob([payload], {type: "application/json"});
+        navigator.sendBeacon(url, blob);
+      } else {
+        fetch(url, {method:"POST", headers:{"Content-Type":"application/json"}, body:payload, keepalive:true});
+      }
+    } catch(e) {}
+  })();
+
+</script>
+
+</body>
+</html>

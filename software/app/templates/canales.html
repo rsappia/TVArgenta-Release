@@ -1,0 +1,120 @@
+<!-- SPDX-License-Identifier: LicenseRef-TVArgenta-NC-Attribution-Consult-First
+     Proyecto: TVArgenta — Retro TV | Autor: Ricardo Sappia (rsflightronics@gmail.com)
+     © 2025. No comercial, atribución y consulta previa. TAL CUAL, sin garantías.
+     Ver LICENSE para términos completos.
+-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>📺 Canales de TVArgenta</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white font-mono min-h-screen p-4">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl text-yellow-400 font-bold mb-6 text-center">📡 Canales de TVArgenta</h1>
+
+    <!-- LISTADO DE CANALES EXISTENTES -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {% for key, canal in canales.items() %}
+        <div class="bg-gray-900 border border-yellow-600 rounded-lg p-4 shadow-lg">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              {% if canal.icono %}
+                <span class="text-2xl">{{ canal.icono }}</span>
+              {% endif %}
+              {{ canal.nombre }}
+            </h2>
+          </div>
+          <p class="text-sm text-gray-300 italic mb-2">{{ canal.descripcion }}</p>
+
+          <p class="text-sm text-yellow-400 font-semibold mb-1">🎯 Tags prioridad:</p>
+          <p class="text-xs text-gray-200">{{ canal.tags_prioridad | join(', ') }}</p>
+
+          <div class="flex justify-end gap-4 mt-4">
+            <form action="/editar_canal/{{ key }}" method="get">
+              <button type="submit" class="text-blue-400 hover:underline text-sm">✏️ Editar canal</button>
+            </form>
+            <form action="/eliminar_canal/{{ key }}" method="post">
+              <button type="submit" class="text-red-400 hover:underline text-sm">🗑️ Eliminar canal</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- FORMULARIO PARA NUEVO O EDICIÓN DE CANAL -->
+    <hr class="my-10 border-yellow-700">
+    <h2 class="text-2xl font-bold text-green-400 mb-4 text-center">
+      {% if canal_actual %}✏️ Editar canal{% else %}➕ Crear un nuevo canal{% endif %}
+    </h2>
+
+    <form action="/guardar_canal" method="post" class="space-y-4 bg-gray-800 p-4 rounded border border-yellow-600 shadow">
+
+      {% if canal_actual %}
+        <input type="hidden" name="canal_id" value="{{ canal_id }}">
+      {% endif %}
+
+      <div>
+        <label class="block text-sm mb-1">📺 Nombre del Canal</label>
+        <input type="text" name="nombre"
+               value="{{ canal_actual.nombre if canal_actual else '' }}"
+               class="w-full bg-gray-900 text-white px-3 py-2 rounded" required>
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1">📝 Descripción</label>
+        <textarea name="descripcion" rows="2"
+                  class="w-full bg-gray-900 text-white px-3 py-2 rounded">{{ canal_actual.descripcion if canal_actual else '' }}</textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1">🌟 Elegí un ícono (opcional)</label>
+        <select name="icono" class="w-full bg-gray-900 text-white px-3 py-2 rounded">
+          <option value="">(Sin ícono)</option>
+          {% set iconos = ["📺", "🎉", "🏠", "😂", "🧸", "⚽", "📼", "🧉"] %}
+          {% for icon in iconos %}
+            <option value="{{ icon }}" {% if canal_actual and canal_actual.icono == icon %}selected{% endif %}>{{ icon }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1">🏷️ Tags prioridad (seleccioná los que correspondan)</label>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          {% for grupo, info in tags.items() %}
+            {% for tag in info.tags %}
+              {% if tag in config.tags_incluidos %}
+              <label class="flex items-center gap-2">
+                <input type="checkbox" name="tags_prioridad" value="{{ tag }}"
+                       {% if canal_actual and tag in canal_actual.tags_prioridad %}checked{% endif %}
+                       class="accent-yellow-400">
+                <span>{{ tag }}</span>
+              </label>
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="flex justify-center items-center mt-6 gap-4 flex-wrap">
+		  <button type="submit" class="bg-green-500 hover:bg-green-600 text-black font-bold px-6 py-2 rounded shadow">
+			💾 {% if canal_actual %}Actualizar{% else %}Guardar canal{% endif %}
+		  </button>
+
+		  {% if canal_actual %}
+			<a href="{{ url_for('canales') }}" class="text-red-400 hover:underline text-sm">
+			  ❌ Cancelar edición
+			</a>
+		  {% endif %}
+		</div>
+    </form>
+
+    <div class="text-center mt-8">
+      <a href="{{ url_for('index') }}" class="text-blue-400 hover:underline text-sm">⬅ Volver al inicio</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!-- SPDX-License-Identifier: LicenseRef-TVArgenta-NC-Attribution-Consult-First
+     Proyecto: TVArgenta — Retro TV | Autor: Ricardo Sappia (rsflightronics@gmail.com)
+     © 2025. No comercial, atribución y consulta previa. TAL CUAL, sin garantías.
+     Ver LICENSE para términos completos.
+-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📺 TVArgenta - Modo Tele</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .tv-wrapper {
+      max-width: 100%;
+      aspect-ratio: 4 / 3;
+    }
+    @media (orientation: portrait) {
+      .tv-wrapper {
+        aspect-ratio: 3 / 4;
+      }
+    }
+  </style>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-4">
+
+  <h1 class="text-2xl text-yellow-400 font-bold mb-4">🎬 Mirando TVArgenta</h1>
+
+  <!-- CONTENEDOR DE VIDEO -->
+  <div class="tv-wrapper w-full sm:w-4/5 md:w-2/3 lg:w-1/2 relative border-4 border-yellow-500 rounded-xl shadow-xl overflow-hidden">
+    <video id="tv-video" class="w-full h-full object-contain bg-black" autoplay muted controls playsinline>
+      Tu navegador no soporta video HTML5.
+    </video>
+  </div>
+
+  <!-- INFO DEL VIDEO -->
+  <div id="video-info" class="mt-4 text-center space-y-2 text-sm text-gray-300">
+    <p id="info-title" class="text-lg font-bold text-white"></p>
+    <p id="info-tags"></p>
+    <p id="info-score" class="italic text-xs text-gray-400"></p>
+  </div>
+	<!-- SELECCIÓN DE CANAL -->
+  <div id="canales-container" class="mb-6 text-center">
+    <h2 class="text-lg text-green-400 font-bold mb-2">📡 Elegí un canal</h2>
+    <div id="canales-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-4 justify-center"></div>
+    <p id="canal-activo" class="text-sm text-gray-400 mt-2"></p>
+  </div>
+  <div class="flex gap-4 mt-6">
+    <button onclick="loadNextVideo()" class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded font-bold shadow">
+      ⏭ Siguiente
+    </button>
+    <a href="{{ url_for('index') }}" class="text-blue-400 hover:underline text-sm">⬅ Volver al inicio</a>
+  </div>
+
+  <script>
+	  const videoEl = document.getElementById("tv-video");
+	  const infoTitle = document.getElementById("info-title");
+	  const infoTags = document.getElementById("info-tags");
+	  const infoScore = document.getElementById("info-score");
+	  const canalActivoLabel = document.getElementById("canal-activo");
+	  const canalesGrid = document.getElementById("canales-grid");
+
+	  function loadNextVideo() {
+		fetch("/api/next_video")
+		  .then(res => {
+			if (!res.ok) throw new Error("Error al buscar próximo video");
+			return res.json();
+		  })
+		  .then(data => {
+			if (data.no_videos) {
+			  videoEl.src = "";
+			  infoTitle.textContent = "⚠️ Este canal no tiene videos compatibles.";
+			  infoTags.textContent = "Probá con otro canal o cambiá los tags.";
+			  infoScore.textContent = "";
+			  return;
+			}
+
+			const videoUrl = `/videos/${data.video_id}.mp4`;
+			videoEl.src = videoUrl;
+			videoEl.load();
+			videoEl.volume = 0.5;
+			videoEl.play();
+
+			infoTitle.textContent = data.title || data.video_id.replace(/_/g, " ");
+			infoTags.textContent = data.tags && data.tags.length
+			  ? `🏷️ Tags: ${data.tags.join(", ")}`
+			  : "🏷️ Sin tags";
+			infoScore.textContent = data.score !== undefined
+			  ? `🔢 Score: ${data.score}`
+			  : "";
+		  })
+		  .catch(err => {
+			alert("No se pudo cargar el siguiente video.");
+			console.error(err);
+		  });
+	  }
+
+	  videoEl.addEventListener("ended", () => {
+		setTimeout(loadNextVideo, 500);
+	  });
+
+	  loadNextVideo();
+
+    // Cargar grilla de canales
+    fetch("/api/canales")
+      .then(res => {
+        if (!res.ok) throw new Error("No se pudo obtener la lista de canales");
+        return res.json();
+      })
+      .then(data => {
+        if (!data || !data.canales) return;
+
+        data.canales.forEach(canal => {
+          if (!canal.id) return;
+
+          const btn = document.createElement("button");
+          btn.textContent = `${canal.icono || "📺"} ${canal.nombre}`;
+          btn.setAttribute("aria-label", `Seleccionar canal ${canal.nombre}`);
+          btn.className = "bg-gray-800 hover:bg-yellow-700 text-white px-4 py-2 rounded text-sm font-bold";
+          btn.onclick = () => setCanalActivo(canal.id);
+          canalesGrid.appendChild(btn);
+        });
+
+        canalActivoLabel.textContent = `📡 Canal actual: ${data.canal_activo_nombre}`;
+      })
+      .catch(err => {
+        console.error("Error al cargar canales:", err);
+      });
+
+    function setCanalActivo(id) {
+      fetch("/api/set_canal_activo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ canal_id: id })
+      })
+        .then(res => res.json())
+        .then(() => {
+          location.reload();
+        });
+    }
+  </script>
+
+</body>
+</html>

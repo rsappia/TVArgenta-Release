@@ -1,0 +1,875 @@
+<!-- SPDX-License-Identifier: LicenseRef-TVArgenta-NC-Attribution-Consult-First
+     Proyecto: TVArgenta — Retro TV | Autor: Ricardo Sappia (rsflightronics@gmail.com)
+     © 2025. No comercial, atribución y consulta previa. TAL CUAL, sin garantías.
+     Ver LICENSE para términos completos.
+-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta name="google" content="notranslate">	
+  <meta charset="UTF-8">
+  <title>TV Argenta</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+	  width: 100vw;
+	  height: 100vh;
+      background-color: black;
+      overflow: hidden;
+    }
+
+    video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+    }
+	
+	
+	#root, video {
+	  width: 100vw;
+	  height: 100vh;
+	  object-fit: cover;
+	}
+
+	#overlay {
+	  position: absolute;
+	  bottom: 40px;
+	  left: 50%;
+	  transform: translateX(-50%);
+	  background-color: rgba(0, 0, 160, 0.85);
+	  color: white;
+	  font-family: monospace;
+	  font-size: 28px;
+	  padding: 10px 20px;
+	  border-radius: 10px;
+	  text-align: center;
+	  opacity: 0;
+	  transition: opacity 0.5s ease;
+	  pointer-events: none;
+	}
+
+    #overlay.show {
+      opacity: 1;
+    }
+	
+	body {
+	  cursor: none;
+	}
+	
+	video::-webkit-media-controls-enclosure {
+		overflow: hidden;
+    }
+	
+	#barra-volumen {
+	  position: absolute;
+	  bottom: 24px;
+	  left: 50%;
+	  transform: translateX(-50%);
+	  background: #0000cc; /* azul clásico de OSD */
+	  padding: 8px 14px;
+	  border: 2px solid white;
+	  box-shadow: 0 0 3px white;
+	  display: flex;
+	  align-items: center;
+	  gap: 14px;
+	  font-family: Arial, sans-serif;
+	  color: white;
+	  z-index: 9998;
+	  border-radius: 4px;
+	  image-rendering: pixelated;
+	}
+
+	.label-volumen {
+	  font-size: 14px;
+	  font-weight: bold;
+	  white-space: nowrap;
+	}
+
+	.bloques {
+	  display: flex;
+	  gap: 4px;
+	}
+
+	.bloques .bloque {
+	  width: 6px;
+	  height: 16px;
+	  background: white;
+	  opacity: 0.2;
+	  transition: opacity 0.1s ease;
+	}
+
+	.bloques .bloque.activo {
+	  opacity: 1;
+	}
+
+	#barra-volumen.oculto {
+	  display: none;
+	}
+
+
+	body::before {
+	  content: "";
+	  position: absolute;
+	  width: 100%;
+	  height: 100%;
+	  background: repeating-linear-gradient(
+		to bottom,
+		rgba(255,255,255,0.02),
+		rgba(255,255,255,0.02) 1px,
+		transparent 1px,
+		transparent 2px
+	  );
+	  pointer-events: none;
+	  z-index: 9999;
+	}
+	
+	#menu-osd {
+	  position: absolute;     
+	  top: 10%;
+	  left: 50%;
+	  transform: translateX(-50%);
+	  width: 60vw;
+	  max-width: 480px;
+	  aspect-ratio: 4 / 3;
+	  background: #0018a8;
+	  color: #fff;
+	  font-family: "Lucida Console", "Courier New", monospace;
+	  border: 3px solid #ffffff;
+	  box-shadow: 0 0 10px #ffffff;
+	  padding: 14px 18px 20px;
+	  border-radius: 6px;
+	  display: none;
+	  z-index: 10001; /* arriba de las scanlines */
+	}
+
+	  #menu-osd .menu-title {
+		font-weight: bold;
+		letter-spacing: 1px;
+		text-align: center;
+		border-bottom: 2px solid #ffffff;
+		padding-bottom: 6px;
+		margin-bottom: 10px;
+	  }
+
+	  #menu-osd .menu-list {
+		list-style: none;
+		margin: 0;
+		padding: 6px 0 0 0;
+	  }
+
+	  #menu-osd .menu-item {
+		font-size: 22px;
+		line-height: 1.6em;
+		white-space: nowrap;
+	  }
+
+	  #menu-osd .cursor {
+		display: inline-block;
+		width: 1em;
+		text-align: center;
+		margin-right: 6px;
+	  }
+
+	  /* Pie de ayuda */
+	  #menu-osd .menu-footer {
+		margin-top: 10px;
+		border-top: 2px solid #ffffff;
+		padding-top: 6px;
+		font-size: 14px;
+		display: flex;
+		justify-content: space-between;
+		opacity: 0.9;
+	  }
+	  
+	#menu-osd .menu-item.activo {
+	  background: rgba(255,255,255,0.15);
+	}
+	#channel-badge {
+	  position: absolute;
+	  bottom: 35px;              
+	  right: 55px;
+	  padding: 6px 10px;
+	  background: rgba(0, 0, 32, 0.45);
+	  border: 2px solid rgba(255,255,255,0.6);
+	  color: #fff;
+	  font-family: "Lucida Console", "Courier New", monospace;
+	  font-size: 14px;
+	  letter-spacing: 0.5px;
+	  text-transform: uppercase;
+	  border-radius: 6px;
+	  box-shadow: 0 0 6px rgba(255,255,255,0.25);
+	  z-index: 10000;
+	  display: none;
+	}
+
+
+	#mute-indicator{
+	  position: absolute;
+	  top: 12px;
+	  left: 12px;
+	  display: none;
+	  align-items: center;
+	  gap: 8px;
+	  padding: 6px 10px;
+	  background: rgba(0, 0, 64, 0.85);
+	  border: 2px solid white;
+	  border-radius: 4px;
+	  box-shadow: 0 0 6px rgba(255,255,255,0.5);
+	  color: white;
+	  font-family: "Lucida Console", monospace;
+	  font-size: 14px;
+	  letter-spacing: 1px;
+	  image-rendering: pixelated;
+	  z-index: 10002;
+	}
+	#mute-indicator .label{
+	  font-size:14px;
+	  letter-spacing:0.5px;
+	  text-transform:uppercase;
+	  opacity:.95;
+	}
+	#mute-indicator svg{
+	  width: 28px;
+	  height: 28px;
+	}
+	
+  </style>
+</head>
+<body>
+  <video id="tvVideo" autoplay playsinline></video>
+  <div id="overlay">Cargando canal...</div>
+  <div id="barra-volumen" class="oculto">
+    <span class="label-volumen">Volume</span>
+    <div class="bloques"></div>
+  </div>
+  
+  <!-- Menú OSD -->
+	<div id="menu-osd" aria-hidden="true">
+	  <div class="menu-title">MAIN MENU</div>
+	  <ul class="menu-list" id="menu-list">
+		<li class="menu-item"><span class="cursor">►</span> Canales predefinidos</li>
+		<li class="menu-item"><span class="cursor"> </span> Mis canales</li>
+		<li class="menu-item"><span class="cursor"> </span> Configuraciones</li>
+		<li class="menu-item"><span class="cursor"> </span> Volver</li>
+	  </ul>
+	  <div class="menu-footer">
+		<div>[Giro] Navegar</div>
+		<div>[Apretar] Seleccionar</div>
+	  </div>
+	</div>
+	
+	<div id="channel-badge"></div>
+	
+	<div id="mute-indicator" aria-hidden="true" title="Volumen en 0">
+	  <svg viewBox="0 0 32 32" role="img" aria-label="Muted">
+		<!-- Caja retro azul -->
+		<rect x="0" y="0" width="32" height="32" rx="3"
+			  fill="#0000aa" stroke="white" stroke-width="2"/>
+		<!-- Parlante -->
+		<path fill="white" d="M8 10h4l6-5v22l-6-5h-4z"/>
+		<!-- Cruz roja -->
+		<line x1="20" y1="10" x2="28" y2="22" stroke="red" stroke-width="3"/>
+		<line x1="28" y1="10" x2="20" y2="22" stroke="red" stroke-width="3"/>
+	  </svg>
+	  <span class="label">MUTE</span>
+	</div>
+	
+  <script>
+    const video = document.getElementById('tvVideo');
+	video.muted = false;
+	video.volume = 0.5;
+	
+	video.addEventListener('volumechange', () => {
+	  if (video.volume === 0 || video.muted) {
+		mostrarIconoMute(true);
+	  } else {
+		mostrarIconoMute(false);
+	  }
+	});
+	
+    const overlay = document.getElementById('overlay');
+    let currentVideo = null;
+	let ultimoCanal = null;
+	
+	let enPedido = false;           // evita pedidos simultáneos
+	let ultimaCarga = 0;            // timestamp de última carga efectiva
+	const MIN_INTERVAL_MS = 1200;   // ventana para ignorar pedidos repetidos
+	let reloadTimer = null;         // timer para reintento diferido de reload
+	
+	let playedReportedFor = null;   // video_id para el que ya se reportó play
+	let playedTimer = null;         // timeout a 10s
+	let playedArmed = false;        // evita múltiples enganches
+	
+	 async function warmupAudio() {
+		try {
+		  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+		  const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.1), ctx.sampleRate); // 100 ms de silencio
+		  const src = ctx.createBufferSource();
+		  src.buffer = buf;
+		  src.connect(ctx.destination);
+		  src.start(0);
+		  // Esperamos un tick y cerramos el contexto (libera recursos y deja todo “listo”)
+		  await new Promise(r => setTimeout(r, 120));
+		  await ctx.close();
+		  console.log('[PLAYER] Audio warm-up done');
+		} catch (e) {
+		  console.warn('[PLAYER] Audio warm-up failed:', e);
+		}
+	  }
+
+
+	async function reportPlayed(videoId) {
+	  try {
+		await fetch("/api/played", {
+		  method: "POST",
+		  headers: {"Content-Type": "application/json"},
+		  body: JSON.stringify({ video_id: videoId })
+		});
+	  } catch (e) {
+		console.warn("[TV] reportPlayed falló:", e);
+	  }
+	}
+	
+	
+    // Fullscreen automático
+    function requestFullscreen() {
+      const el = document.documentElement;
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+      else if (el.msRequestFullscreen) el.msRequestFullscreen();
+    }
+
+	document.addEventListener('click', () => {
+	  video.muted = false;
+	  updateMuteIndicatorFromVol();
+	  video.play();
+	}, { once: true });
+
+	document.addEventListener("DOMContentLoaded", async () => {
+		try {
+		  // 1) “despierta” el audio para que Chromium libere/prepare ALSA
+		  await warmupAudio();
+
+		  // 2) fullscreen (no bloquea si falla)
+		  requestFullscreen();
+
+		  // 3) micro-colchón: da tiempo a que el dispositivo de audio quede ready
+		  await new Promise(r => setTimeout(r, 120));
+
+		  // 4) arrancar el primer video
+		  cargarSiguienteVideo();
+
+		  // 5) aplicar volumen guardado
+		  try {
+			const res = await fetch("/api/volumen");
+			const data = await res.json();
+			video.volume = data.valor / 100;
+			updateMuteIndicatorFromVol(data.valor);
+		  } catch (e) {
+			console.warn("[PLAYER] no pude leer volumen:", e);
+		  }
+
+		  // 6) preferencias UI (badge de canal, etc.)
+		  await cargarUiPrefs();
+		} catch (e) {
+		  console.error("[PLAYER] init falló:", e);
+		  // fall back: igual probá cargar
+		  cargarSiguienteVideo();
+		}
+	  });
+
+	
+	function cargarSiguienteVideo(force = false) {
+	  const ahora = Date.now();
+
+	  // Si ya hay un fetch en vuelo, no encimamos otro
+	  if (enPedido) {
+		console.debug("[TV] Skip: pedido en curso");
+		return;
+	  }
+
+	  // Throttle: si fue hace muy poco y no es forzado, lo ignoramos
+	  if (!force && (ahora - ultimaCarga) < MIN_INTERVAL_MS) {
+		console.debug("[TV] Skip: throttle activo", { msDesdeUltima: ahora - ultimaCarga });
+		return;
+	  }
+
+	  enPedido = true;
+
+	  fetch('/api/next_video')
+		.then(res => res.json())
+		.then(data => {
+		  if (data.cooldown) {
+			// Pequeño retry para salir del bache inicial
+			setTimeout(() => cargarSiguienteVideo(true), 700);
+			return;
+		  }
+		  if (data.no_videos) {
+			mostrarOverlay("Sin videos disponibles");
+			return;
+		  }
+
+		  const cambioDeVideo = data.video_id !== currentVideo;
+		  const cambioDeCanal = data.modo !== ultimoCanal;
+
+		  // Solo cambiamos el src si verdaderamente cambia el video o es forzado
+		  if (cambioDeVideo ) {
+			currentVideo = data.video_id;
+			video.src = `/videos/${data.video_id}.mp4`;
+			video.load();
+			video.play().catch(e => console.warn("[TV] play() rechazado:", e));
+			setChannelBadgeText(data.canal_nombre);
+			
+			// --- armado del umbral de “play real” ---
+			playedReportedFor = null;
+			playedArmed = false;
+			clearTimeout(playedTimer);
+
+			// A) 10 segundos
+			playedTimer = setTimeout(() => {
+			  if (currentVideo && playedReportedFor !== currentVideo) {
+				playedReportedFor = currentVideo;
+				reportPlayed(currentVideo);
+			  }
+			}, 10000);
+
+			// B) 30% de duración (cuando se conozca el metadata)
+			const onTimeUpdate = () => {
+			  const dur = video.duration || 0;
+			  if (!playedArmed && dur > 0) {
+				playedArmed = true; // sólo armamos una vez cuando tengamos duración
+			  }
+			  if (dur > 0) {
+				const threshold = 0.30 * dur; // 30%
+				if (video.currentTime >= threshold && playedReportedFor !== currentVideo) {
+				  playedReportedFor = currentVideo;
+				  clearTimeout(playedTimer);
+				  reportPlayed(currentVideo);
+				  video.removeEventListener("timeupdate", onTimeUpdate);
+				}
+			  }
+			};
+
+			video.removeEventListener("timeupdate", onTimeUpdate);
+			video.addEventListener("timeupdate", onTimeUpdate);
+			
+		  }
+
+		  if (cambioDeCanal) {
+			ultimoCanal = data.modo;
+			mostrarOverlay(data.canal_nombre);
+			
+		  }
+		})
+		.catch(err => {
+		  console.error("Error al obtener el siguiente video:", err);
+		  mostrarOverlay("Error de conexión");
+		})
+		.finally(() => {
+		  ultimaCarga = Date.now();
+		  enPedido = false;
+		});
+	}
+
+
+    function mostrarOverlay(texto) {
+      overlay.textContent = texto;
+      overlay.classList.add("show");
+
+      setTimeout(() => {
+        overlay.classList.remove("show");
+      }, 3000);
+    }
+
+    video.addEventListener('ended', () => {
+      // Si por algún motivo no se reportó (video muy corto, etc.), reportá ahora:
+	  if (currentVideo && playedReportedFor !== currentVideo) {
+		playedReportedFor = currentVideo;
+		reportPlayed(currentVideo);
+	  }
+	  cargarSiguienteVideo(true);
+    });
+	
+	setInterval(async () => {
+	  try {
+		const res = await fetch("/api/should_reload");
+		const data = await res.json();
+		if (data.should_reload) {
+		  const ahora = Date.now();
+		  const restante = MIN_INTERVAL_MS - (ahora - ultimaCarga);
+
+		  // Si ya pasó la ventana, forzamos ahora; si no, agendamos un único intento
+		  if (restante <= 0) {
+			cargarSiguienteVideo(false);
+		  } else {
+			clearTimeout(reloadTimer);
+			reloadTimer = setTimeout(() => cargarSiguienteVideo(false), restante + 50);
+		  }
+		}
+	  } catch (e) {
+		console.error("Error checking reload trigger", e);
+	  }
+	}, 300);
+
+	
+	let volumenTimer = null;
+
+	function mostrarVolumen(valor) {
+	  const barra = document.getElementById("barra-volumen");
+	  const contenedor = barra.querySelector(".bloques");
+
+	  barra.classList.remove("oculto");
+
+	  const total = 20;
+	  const activos = Math.round((valor / 100) * total);
+
+	  contenedor.innerHTML = "";
+
+	  for (let i = 0; i < total; i++) {
+		const b = document.createElement("div");
+		b.classList.add("bloque");
+		if (i < activos) b.classList.add("activo");
+		contenedor.appendChild(b);
+	  }
+
+	  video.volume = valor / 100;
+	  updateMuteIndicatorFromVol(valor); 	
+	  clearTimeout(volumenTimer);
+	  volumenTimer = setTimeout(() => {
+		barra.classList.add("oculto");
+	  }, 3000);
+	}
+
+
+	setInterval(async () => {
+	  const res = await fetch("/api/volumen_ping");
+	  const data = await res.json();
+	  if (data.ping) {
+		const resVol = await fetch("/api/volumen");
+		const volData = await resVol.json();
+		mostrarVolumen(volData.valor);
+	  }
+	}, 300);
+	
+	// --- Estado del menú ---
+	let menuVisible = false;
+	let menuTimer = null;
+	const MENU_AUTOHIDE_MS = 5000;
+	const menuEl = document.getElementById("menu-osd");
+
+	function resetMenuTimer() {
+	  clearTimeout(menuTimer);
+	  menuTimer = setTimeout(() => {
+		if (menuVisible) ocultarMenu();
+	  }, MENU_AUTOHIDE_MS);
+	}
+
+	const menuListEl = document.getElementById("menu-list");
+	let menuIndex = 0;
+
+	function renderMenu() {
+	  const items = menuListEl.querySelectorAll(".menu-item");
+	  items.forEach((li, idx) => {
+		const cur = li.querySelector(".cursor");
+		if (idx === menuIndex) {
+		  cur.textContent = "►";
+		  li.classList.add("activo");
+		} else {
+		  cur.textContent = " ";
+		  li.classList.remove("activo");
+		}
+	  });
+	}
+
+	async function setMenuOpenState(open) {
+	  try {
+		await fetch("/api/menu_state", {
+		  method: "POST",
+		  headers: {"Content-Type": "application/json"},
+		  body: JSON.stringify({open})
+		});
+	  } catch (e) {
+		console.warn("menu_state POST falló:", e);
+	  }
+	}
+	
+	let menuMode = "main"; // "main" | "config"
+
+	function buildMenu() {
+	  const ul = menuListEl;
+	  ul.innerHTML = "";
+	  const items = [];
+
+	  if (menuMode === "main") {
+		items.push("Canales predefinidos");
+		items.push("Mis canales");
+		items.push("Configuraciones");
+		items.push("Apagar");
+		items.push("Volver");
+	  } else if (menuMode === "config") {
+		items.push(`Mostrar nombre canal: ${uiShowChannelName ? "Sí" : "No"}`);
+		items.push("Volver");
+	  } else if (menuMode === "power_confirm") {
+		items.push("Confirmar apagado");
+		items.push("Volver");
+	  }
+
+	  for (const label of items) {
+		const li = document.createElement("li");
+		li.className = "menu-item";
+		li.dataset.label = label;
+		li.innerHTML = `<span class="cursor"> </span> ${label}`;
+		ul.appendChild(li);
+	  }
+	}		
+
+	function mostrarMenu() {
+	  if (menuVisible) {
+		ocultarMenu();
+		return;
+	  }
+	  menuVisible = true;
+	  menuMode = "main"; // siempre entra al principal
+	  menuEl.style.display = "block";
+	  buildMenu();
+	  menuIndex = 0;
+	  renderMenu();
+	  setMenuOpenState(true);
+	  resetMenuTimer();
+	}
+	function ocultarMenu() {
+	  menuVisible = false;
+	  menuEl.style.display = "none";
+	  clearTimeout(menuTimer);
+	  setMenuOpenState(false);
+	}
+
+	function moverCursor(delta) {
+	  const total = menuListEl.querySelectorAll(".menu-item").length;
+	  menuIndex = (menuIndex + (delta > 0 ? 1 : -1) + total) % total;
+	  renderMenu();
+	  resetMenuTimer();
+	}
+
+	function ejecutarSeleccion() {
+	  const items = [...menuListEl.querySelectorAll(".menu-item")];
+	  const label = items[menuIndex].dataset.label;
+
+	  // "Volver" siempre cierra el menú
+	  if (label.startsWith("Volver")) {
+		ocultarMenu();
+		return;
+	  }
+
+	  if (menuMode === "main") {
+		if (label.startsWith("Configuraciones")) {
+		  menuMode = "config";
+		  buildMenu();
+		  menuIndex = 0;
+		  renderMenu();
+		  resetMenuTimer();
+		  return;
+		}
+		
+		if (label.startsWith("Apagar")) {            
+		  menuMode = "power_confirm";
+		  buildMenu(); menuIndex = 0; renderMenu(); resetMenuTimer();
+		  return;
+		}
+		
+		// Placeholder para otras opciones del principal
+		mostrarOverlay(`${label} (en construcción)`);
+		resetMenuTimer();
+		return;
+	  }
+
+	if (menuMode === "config") {
+	  if (label.startsWith("Mostrar nombre canal")) {
+		uiShowChannelName = !uiShowChannelName;
+		if (!uiShowChannelName) {
+		  channelBadgeEl.style.display = "none";
+		} else {
+		  // mostrar feedback breve si ya tenemos un nombre cargado
+		  if (channelBadgeEl.textContent) showChannelBadgeFor(3);
+		}
+		guardarUiPrefs();
+		buildMenu(); renderMenu(); resetMenuTimer();
+		return;
+	  }
+	}
+	
+	if (menuMode === "power_confirm") {           
+		if (label.startsWith("Confirmar apagado")) {
+		  // Feedback inmediato en pantalla
+		  mostrarOverlay("Apagando…");
+		  ocultarMenu();
+		  // Evitar toques múltiples
+		  if (!window.__haltDispatched) {
+			window.__haltDispatched = true;
+			fetch("/api/power", {
+			  method: "POST",
+			  headers: { "Content-Type": "application/json" },
+			  body: JSON.stringify({ action: "halt" })
+			}).catch(() => {});
+		  }
+		  return;
+		}
+	}
+	
+	
+	}
+
+
+
+
+	let lastMenuPingTs = 0;
+	let menuPollingArmed = false;              
+	setTimeout(() => { menuPollingArmed = true; }, 800);
+	// Poll de eventos del encoder para el menú (flanco de bajada sin giro)
+	setInterval(async () => {
+	  try {
+		const res = await fetch("/api/menu_ping");
+		const data = await res.json();
+		if (data.ping && data.ts && data.ts !== lastMenuPingTs) {
+		
+		if (!menuPollingArmed) {
+			lastMenuPingTs = data.ts;
+			return;
+		  }
+		
+		  lastMenuPingTs = data.ts;
+		  // Un solo toggle por evento: si está abierto, cerrar; si está cerrado, abrir
+		  if (menuVisible) {
+			ocultarMenu();
+		  } else {
+			mostrarMenu();
+		  }
+		}
+	  } catch (e) {
+		console.error("Error en /api/menu_ping:", e);
+	  }
+	}, 200);
+	
+	// NAV por giro cuando el menú está visible
+	setInterval(async () => {
+	  if (!menuVisible) return;
+	  try {
+		const r = await fetch("/api/menu_nav");
+		const d = await r.json();
+		if (d.ping && typeof d.delta === "number") {
+		  moverCursor(d.delta);
+		}
+	  } catch (e) {
+		console.error("Error /api/menu_nav:", e);
+	  }
+	}, 120);
+
+	// SELECT (apretar/soltar) dentro del menú
+	setInterval(async () => {
+	  if (!menuVisible) return;
+	  try {
+		const r = await fetch("/api/menu_select");
+		const d = await r.json();
+		if (d.ping) {
+		  ejecutarSeleccion();
+		}
+	  } catch (e) {
+		console.error("Error /api/menu_select:", e);
+	  }
+	}, 120);
+	
+	// --- Preferencias UI ---
+	let uiShowChannelName = true;
+	const channelBadgeEl = document.getElementById("channel-badge");
+
+	async function cargarUiPrefs() {
+	  try {
+		const r = await fetch("/api/ui_prefs");
+		const d = await r.json();
+		uiShowChannelName = !!d.show_channel_name;
+		aplicarVisibilidadBadge();
+	  } catch {}
+	}
+
+	async function guardarUiPrefs() {
+	  try {
+		await fetch("/api/ui_prefs", {
+		  method: "POST",
+		  headers: {"Content-Type": "application/json"},
+		  body: JSON.stringify({ show_channel_name: uiShowChannelName })
+		});
+	  } catch {}
+	}
+
+	function aplicarVisibilidadBadge() {
+	  if (!uiShowChannelName) {
+		channelBadgeEl.style.display = "none"; // si está off, ocultar
+	  }
+	  // si está on, no lo mostramos acá: lo muestra setChannelBadgeText() por 10s
+	}
+
+	let badgeTimer = null;
+	function showChannelBadgeFor(seconds = 10) {
+	  if (!uiShowChannelName) return;
+	  channelBadgeEl.style.display = "block";
+	  clearTimeout(badgeTimer);
+	  badgeTimer = setTimeout(() => { channelBadgeEl.style.display = "none"; }, seconds * 1000);
+	}
+	
+	function setChannelBadgeText(nombre) {
+	  channelBadgeEl.textContent = nombre || "";
+	  showChannelBadgeFor(10);
+	}
+	
+	const muteIndicator = document.getElementById("mute-indicator");
+
+	function setMuteVisible(show){
+	  muteIndicator.style.display = show ? "flex" : "none";
+	}
+
+	// volumen en 0 o video.muted => mostrar
+	function updateMuteIndicatorFromVol(volPercent){
+	  const vol0to1 = (typeof volPercent === "number" ? volPercent/100 : video.volume);
+	  const shouldShow = video.muted || vol0to1 <= 0.001;
+	  setMuteVisible(shouldShow);
+	}
+	
+	fetch("/api/kiosk_ping?src=player", {method:"POST", keepalive:true}).catch(()=>{});
+	setInterval(()=>{ navigator.sendBeacon("/api/kiosk_ping?src=player"); }, 2000);
+
+  // --- PING watchdog ---
+  function wdPing() {
+    try {
+      if (navigator.sendBeacon) {
+        const blob = new Blob([JSON.stringify({at: Date.now()})], {type: 'application/json'});
+        navigator.sendBeacon("{{ url_for('api_ping') }}", blob);
+      } else {
+        fetch("{{ url_for('api_ping') }}", {method: "POST", headers:{'Content-Type':'application/json'}, body: JSON.stringify({at: Date.now()}), keepalive: true});
+      }
+    } catch(e) {}
+  }
+  wdPing();                 // ping inmediato al cargar player
+  const wdTimer = setInterval(wdPing, 5000);
+  window.addEventListener('beforeunload', () => clearInterval(wdTimer));
+
+	
+  (function bootProbe(){
+    try {
+      const url = "/api/boot_probe";
+      const payload = JSON.stringify({ stage: "player_loaded" });
+      if (navigator.sendBeacon) {
+        const blob = new Blob([payload], {type: "application/json"});
+        navigator.sendBeacon(url, blob);
+      } else {
+        fetch(url, {method:"POST", headers:{"Content-Type":"application/json"}, body:payload, keepalive:true});
+      }
+    } catch(e) {}
+  })();
+  
+  
+  </script>
+</body>
+</html>

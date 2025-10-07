@@ -1,0 +1,143 @@
+<!-- SPDX-License-Identifier: LicenseRef-TVArgenta-NC-Attribution-Consult-First
+     Proyecto: TVArgenta — Retro TV | Autor: Ricardo Sappia (rsflightronics@gmail.com)
+     © 2025. No comercial, atribución y consulta previa. TAL CUAL, sin garantías.
+     Ver LICENSE para términos completos.
+-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>📺 TVArgenta</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white min-h-screen font-mono">
+  <div class="max-w-4xl mx-auto py-8 px-4">
+    <h1 class="text-4xl font-bold mb-10 text-center text-yellow-400">📺 TVArgenta</h1>
+	<div class="text-center mt-2 mb-6">
+	  <p class="text-sm text-gray-400">⏳ Tiempo total de recuerdos: <span class="text-yellow-300 font-semibold">{{ recuerdos }}</span></p>
+	</div>
+    <div class="flex flex-wrap justify-center gap-4 mb-12">
+      <a href="{{ url_for('vertele') }}"
+         class="bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2 rounded shadow">
+        📺 Ver la TV
+      </a>
+	  <a href="{{ url_for('canales') }}"
+	   class="inline-block bg-green-700 hover:bg-green-800 text-white font-bold px-6 py-2 rounded shadow">
+	    📡 Canales
+	  </a>  
+      <a href="{{ url_for('upload') }}"
+         class="bg-yellow-600 hover:bg-yellow-700 text-black font-bold px-5 py-2 rounded shadow">
+        ⬆️ Subir nuevos videos
+      </a>
+      <a href="{{ url_for('configuracion') }}"
+         class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2 rounded shadow">
+        ⚙️ Configuración
+      </a>
+      <a href="{{ url_for('tags') }}"
+         class="bg-pink-600 hover:bg-pink-700 text-white font-bold px-5 py-2 rounded shadow">
+        🛠 Editar grupos y tags
+      </a>
+	  
+    </div>
+	
+	<!-- VIDEOS NUEVOS SIN METADATA -->
+    {% if nuevos %}
+    <h2 class="text-2xl text-blue-400 font-bold mt-12 mb-4">🆕 Videos nuevos sin metadata</h2>
+    <ul class="space-y-2">
+      {% for video_id in nuevos %}
+      <li class="bg-gray-700 border border-blue-500 p-4 rounded">
+        <p class="text-lg font-semibold">{{ video_id }}</p>
+        <a href="{{ url_for('edit_video', video_id=video_id) }}"
+           class="text-sm text-blue-300 underline">➕ Completar metadata</a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+	
+    <!-- VIDEOS DISPONIBLES -->
+    <h2 class="text-2xl text-green-400 font-bold mt-8 mb-4">🎬 Videos disponibles</h2>
+    <div class="grid grid-cols-1 gap-6">
+      {% for video_id, video in videos.items() %}
+      <div class="relative bg-gray-800 rounded-lg p-4 shadow-lg border border-yellow-500 flex flex-col sm:flex-row gap-4 items-start">
+        <!-- Botón eliminar video completo -->
+        <button onclick="confirmFullDelete('{{ video_id }}')"
+                class="absolute top-2 right-2 text-red-500 hover:text-white text-lg font-bold"
+                title="Eliminar video completo">🗑</button>
+
+        <!-- Miniatura cuadrada -->
+        <img src="{{ url_for('serve_thumbnail', filename=video_id + '.jpg') }}"
+             onerror="this.onerror=null;this.src='{{ url_for('serve_thumbnail', filename='default_thumbnail.png') }}';"
+             class="w-full sm:w-28 sm:h-28 h-auto aspect-square object-cover rounded border border-yellow-600">
+
+        <!-- Info del video -->
+        <div class="flex-1">
+          <h2 class="text-xl font-semibold mb-1 break-words">{{ video.title }}</h2>
+          <p class="text-sm text-gray-300"><strong>Fecha:</strong> {{ video.fecha }}</p>
+          <p class="text-sm text-gray-300"><strong>Personaje:</strong> {{ video.personaje }}</p>
+          <div class="flex flex-wrap gap-2 mt-2">
+            {% for tag in video.tags %}
+            <span class="bg-yellow-600 text-black text-xs px-2 py-1 rounded-full">{{ tag }}</span>
+            {% endfor %}
+          </div>
+          <div class="flex gap-4 mt-3 flex-wrap">
+            <a href="{{ url_for('video_detail', video_id=video_id) }}"
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded">Ver</a>
+            <a href="{{ url_for('edit_video', video_id=video_id) }}"
+               class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-1 rounded">Editar</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- VIDEOS FANTASMAS -->
+    {% if fantasmas %}
+    <div class="flex justify-between items-center mt-12 mb-4">
+      <h2 class="text-2xl text-red-400 font-bold">👻 Videos fantasmas (archivo no encontrado)</h2>
+      <button onclick="confirmDeleteAll()"
+              class="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-1 rounded">
+        🧹 Eliminar todos
+      </button>
+    </div>
+    <div class="grid grid-cols-1 gap-4">
+      {% for video_id, video in fantasmas.items() %}
+      <div class="bg-gray-800 p-4 border border-red-500 rounded relative">
+        <button onclick="confirmDelete('{{ video_id }}')"
+                class="absolute top-2 right-2 text-red-400 hover:text-white font-bold text-lg">×</button>
+        <h3 class="text-xl font-bold text-red-300">{{ video.title or video_id }}</h3>
+        <p class="text-sm text-gray-400">Fecha: {{ video.fecha or "?" }} | Personaje: {{ video.personaje or "?" }}</p>
+        <div class="flex flex-wrap gap-2 mt-2">
+          {% for tag in video.tags %}
+          <span class="bg-red-600 text-white text-xs px-2 py-1 rounded-full">{{ tag }}</span>
+          {% endfor %}
+        </div>
+        <a href="{{ url_for('edit_video', video_id=video_id) }}"
+           class="text-sm text-red-300 underline mt-2 inline-block">✏️ Editar metadata</a>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <script>
+    function confirmDelete(videoId) {
+      if (confirm("¿Estás seguro de que querés eliminar la metadata de '" + videoId + "'?")) {
+        window.location.href = "/delete/" + videoId;
+      }
+    }
+
+    function confirmDeleteAll() {
+      if (confirm("⚠️ Esto eliminará TODAS las entradas fantasmas (sin archivo de video).\n¿Querés continuar?")) {
+        window.location.href = "/delete_fantasmas";
+      }
+    }
+
+    function confirmFullDelete(videoId) {
+      if (confirm("⚠️ Esto eliminará el archivo de video, su metadata y su thumbnail.\n¿Estás seguro?")) {
+        window.location.href = "/delete_full/" + videoId;
+      }
+    }
+  </script>
+</body>
+</html>

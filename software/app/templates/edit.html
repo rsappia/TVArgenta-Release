@@ -1,0 +1,222 @@
+<!-- SPDX-License-Identifier: LicenseRef-TVArgenta-NC-Attribution-Consult-First
+     Proyecto: TVArgenta — Retro TV | Autor: Ricardo Sappia (rsflightronics@gmail.com)
+     © 2025. No comercial, atribución y consulta previa. TAL CUAL, sin garantías.
+     Ver LICENSE para términos completos.
+-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar video</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <style>
+    .tag-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.375rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: move;
+      touch-action: manipulation;
+    }
+    .tag-remove {
+      margin-left: 0.5rem;
+      background-color: white;
+      color: black;
+      border-radius: 9999px;
+      padding: 0.1rem 0.4rem;
+      font-size: 0.75rem;
+      font-weight: bold;
+      line-height: 1;
+      user-select: none;
+    }
+    .tag-remove:active {
+      background-color: #fbbf24;
+    }
+  </style>
+</head>
+<body class="bg-black text-white min-h-screen font-mono">
+  <div class="max-w-4xl mx-auto py-8 px-4">
+    <h1 class="text-3xl font-bold text-yellow-400 mb-6 text-center">✏️ Editar video</h1>
+
+    <form method="post" class="bg-gray-900 p-6 rounded-lg border border-yellow-500 shadow-xl space-y-6">
+      <p class="text-sm text-gray-400 italic mb-4">
+        Archivo: <code>{{ video_id }}.mp4</code>
+      </p>
+      <div>
+        <label class="block text-sm mb-1">Titulo</label>
+        <input type="text" name="title" value="{{ video.get('title', '') }}"
+               class="w-full bg-gray-800 text-white px-3 py-2 rounded" required>
+      </div>
+
+     
+      <div>
+        <label class="block text-sm mb-2">Tags seleccionados</label>
+        <ul id="selected-tags" class="min-h-[40px] flex flex-wrap gap-2 p-2 bg-gray-800 border border-yellow-500 rounded">
+          {% for tag in video.get('tags', []) %}
+          {% set cat = tag_categoria.get(tag, 'Otros') %}
+          {% set color = tags.get(cat, {}).get('color', '#999') %}
+          <li class="tag-pill text-black" data-value="{{ tag }}" data-cat="{{ cat }}" style="background-color: {{ color }}">
+            <span>{{ tag }}</span>
+            <span class="tag-remove" onpointerdown="removeTag(this)">×</span>
+          </li>
+          {% endfor %}
+        </ul>
+        <input type="hidden" name="tags" id="tags-input">
+      </div>
+
+      <div>
+        <label class="block text-sm mb-2 mt-4">Tags disponibles</label>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {% for grupo, info in tags.items() %}
+          <div class="mb-4">
+            <button type="button"
+                    class="w-full text-left font-bold py-2 px-3 rounded bg-gray-700 hover:bg-gray-600 flex justify-between items-center"
+                    style="color: {{ info.color }};"
+                    onclick="toggleGroup('{{ grupo | replace(' ', '_') }}')">
+              {{ grupo }}
+              <span class="text-white">▼</span>
+            </button>
+            <ul id="group-{{ grupo | replace(' ', '_') }}"
+                class="available-tags flex flex-wrap gap-2 bg-gray-800 p-2 border border-gray-600 rounded mt-2"
+                data-cat="{{ grupo }}">
+              {% for tag in info.tags %}
+                {% if tag not in video.get('tags', []) %}
+                <li class="tag-pill text-white"
+                    data-value="{{ tag }}"
+                    data-cat="{{ grupo }}"
+                    style="background-color: {{ info.color }};">
+                  <span>{{ tag }}</span>
+                </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+	   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm mb-1">Personaje principal</label>
+          <input type="text" name="personaje" value="{{ video.get('personaje', '') }}"
+                 class="w-full bg-gray-800 text-white px-3 py-2 rounded">
+        </div>
+
+        <div>
+          <label class="block text-sm mb-1">Fecha</label>
+          <input type="date" name="fecha" value="{{ video.get('fecha', '') }}"
+                 class="w-full bg-gray-800 text-white px-3 py-2 rounded">
+        </div>
+      </div>
+	  <div>
+        <label class="block text-sm mb-1 mt-4">Modos de reproducción</label>
+        <div class="space-y-1 text-sm">
+          {% for option in ['random', 'cronologico', 'tags', 'sorprendeme', 'contextual'] %}
+            <label class="inline-flex items-center">
+              <input type="checkbox" name="modo" value="{{ option }}"
+                     {% if option in video.get('modo', []) %}checked{% endif %}
+                     class="accent-yellow-400 mr-2">
+              {{ option }}
+            </label><br>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center mt-6 flex-wrap gap-4">
+        <a href="{{ url_for('index') }}" class="text-sm text-blue-400 hover:underline">⬅ Volver al inicio</a>
+        <a href="{{ url_for('tags', from_edit=video_id) }}" class="text-sm text-blue-400 hover:underline">🛠 Editar grupos y tags</a>
+        <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded font-bold">
+          Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    document.querySelectorAll('.available-tags').forEach(list => {
+      new Sortable(list, {
+        group: { name: 'tags', pull: 'clone', put: false },
+        sort: false,
+        animation: 150
+      });
+    });
+
+    new Sortable(document.getElementById('selected-tags'), {
+      group: { name: 'tags', pull: true, put: true },
+      animation: 150,
+      onAdd: evt => {
+        const tagValue = evt.item.dataset.value;
+        const tagCat = evt.item.dataset.cat;
+        const existing = [...evt.to.children].filter(el => el !== evt.item)
+                           .some(el => el.dataset.value === tagValue);
+        if (existing) {
+          evt.item.remove();
+        } else {
+          const color = getColorForCategory(tagCat);
+          evt.item.style.backgroundColor = color;
+          evt.item.innerHTML = `<span>${tagValue}</span>
+            <span class="tag-remove" onpointerdown="removeTag(this)">×</span>`;
+        }
+        removeFromAvailable(tagValue);
+        updateTags();
+      },
+      onSort: updateTags,
+      onRemove: updateTags
+    });
+
+    function removeTag(button) {
+      const tag = button.parentNode;
+      const value = tag.dataset.value;
+      const cat = tag.dataset.cat;
+      tag.remove();
+      restoreToAvailable(value, cat);
+      updateTags();
+    }
+
+    function removeFromAvailable(value) {
+      document.querySelectorAll(`.available-tags li[data-value='${value}']`).forEach(el => el.remove());
+    }
+
+    function restoreToAvailable(value, cat) {
+      const ul = document.querySelector(`.available-tags[data-cat='${cat}']`);
+      if (!ul) return;
+      if ([...ul.children].some(el => el.dataset.value === value)) return;
+      const color = getColorForCategory(cat);
+      const li = document.createElement('li');
+      li.className = 'tag-pill text-white';
+      li.dataset.value = value;
+      li.dataset.cat = cat;
+      li.style.backgroundColor = color;
+      li.innerHTML = `<span>${value}</span>`;
+      ul.appendChild(li);
+      Sortable.create(ul, {
+        group: { name: 'tags', pull: 'clone', put: false },
+        sort: false,
+        animation: 150
+      });
+    }
+
+    function getColorForCategory(cat) {
+      const el = document.querySelector(`.available-tags[data-cat='${cat}'] li`);
+      return el ? el.style.backgroundColor : '#888';
+    }
+
+    function updateTags() {
+      const tags = [...document.getElementById('selected-tags').children]
+        .map(el => el.dataset.value);
+      document.getElementById('tags-input').value = tags.join(',');
+    }
+
+    function toggleGroup(id) {
+      const el = document.getElementById("group-" + id);
+      el.style.display = el.style.display === "none" ? "flex" : "none";
+    }
+
+    updateTags();
+  </script>
+</body>
+</html>

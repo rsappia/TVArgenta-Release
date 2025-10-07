@@ -1,0 +1,48 @@
+<!-- SPDX-License-Identifier: LicenseRef-TVArgenta-NC-Attribution-Consult-First
+     Proyecto: TVArgenta — Retro TV | Autor: Ricardo Sappia (rsflightronics@gmail.com)
+     © 2025. No comercial, atribución y consulta previa. TAL CUAL, sin garantías.
+     Ver LICENSE para términos completos.
+-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ video.title or video_id }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white font-mono">
+  <div class="max-w-3xl mx-auto p-8">
+    <h1 class="text-3xl font-bold text-yellow-400 mb-4">
+      {{ video.title or video_id }}
+    </h1>
+
+    <p class="text-sm text-gray-400 mb-1">
+      <strong>Archivo:</strong> {{ video_id }}.mp4
+    </p>
+    <p class="text-sm text-gray-400 mb-1">
+      <strong>Fecha:</strong> {{ video.fecha or "?" }}
+    </p>
+    <p class="text-sm text-gray-400 mb-4">
+      <strong>Personaje:</strong> {{ video.personaje or "?" }}
+    </p>
+
+    <!-- Reproductor de video -->
+    <video controls class="w-full rounded border border-yellow-500 shadow-lg">
+      <source src="{{ url_for('serve_video', filename=video_id + '.mp4') }}" type="video/mp4">
+      Tu navegador no soporta la etiqueta de video.
+    </video>
+
+    <!-- Tags -->
+    <div class="flex flex-wrap gap-2 mt-6">
+      {% for tag in video.tags %}
+      <span class="bg-yellow-600 text-black text-xs px-2 py-1 rounded-full">{{ tag }}</span>
+      {% endfor %}
+    </div>
+
+    <a href="{{ url_for('index') }}" class="mt-6 inline-block text-sm text-blue-300 underline">
+      ⬅ Volver al inicio
+    </a>
+  </div>
+</body>
+</html>

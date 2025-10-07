@@ -1,0 +1,289 @@
+<!-- SPDX-License-Identifier: LicenseRef-TVArgenta-NC-Attribution-Consult-First
+     Proyecto: TVArgenta — Retro TV | Autor: Ricardo Sappia (rsflightronics@gmail.com)
+     © 2025. No comercial, atribución y consulta previa. TAL CUAL, sin garantías.
+     Ver LICENSE para términos completos.
+-->
+
+<!doctype html>
+<meta charset="utf-8">
+<title>TVArgenta boot</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --boot-duration: 25s;  /* duración de la barra */
+  }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #000;
+    color: #fff;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+    user-select: none;
+    overflow: hidden;
+  }
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+  }
+  /* Marco para la imagen 800x480 centrada */
+  .frame {
+    position: relative;
+    width: 800px;
+    height: 480px;
+    background: #000;
+    outline: 2px solid rgba(255,255,255,0.08);
+    box-shadow: 0 0 40px rgba(0,0,0,0.8) inset;
+  }
+  .frame img {
+    position: absolute;
+    inset: 0;
+    width: 800px;
+    height: 480px;
+    object-fit: cover;
+    image-rendering: pixelated;
+	z-index: 1; 
+  }
+
+  /* Overlay inferior con spinner, frases y barra */
+  .overlay {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 14px 18px 18px;
+    background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.55), rgba(0,0,0,0));
+	z-index: 2; position:absolute;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+	padding-bottom: 2px;
+  }
+  /* Spinner retro */
+  .spin {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.25);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    filter: drop-shadow(0 0 2px rgba(255,255,255,0.35));
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .phrase {
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    opacity: 0.95;
+    text-shadow: 0 0 6px rgba(255,255,255,0.15);
+	will-change: contents;
+    transform: translateZ(0);
+	transition: opacity .05s linear;
+	line-height: 1.35;
+  }
+ 
+   .phrase.tick { opacity: .999; }
+
+  /* Barra de progreso */
+  .bar {
+    position: relative;
+    height: 10px;
+    width: 100%;
+    border: 2px solid #fff;
+    background: #0a2a66; /* azul noventoso */
+    box-shadow: 0 0 6px #fff;
+    image-rendering: pixelated;
+    overflow: hidden;
+	margin-top: 6px; 
+  }
+  .fill {
+    height: 100%;
+    width: 0%;
+    background: #fff;
+    animation: fill var(--boot-duration) linear forwards;
+  }
+  @keyframes fill { from { width: 0%; } to { width: 100%; } }
+
+  /* Minidisclaimer arriba (opcional) */
+  .topnote {
+    position: absolute; top: 8px; left: 12px; right: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px; opacity: 0.8;
+    color: rgba(255,255,255,0.8);
+	z-index: 2; position:absolute;
+  }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #2cff72; box-shadow: 0 0 8px #2cff72;
+    animation: blink 1.2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+  /* Fallback si la pantalla no es 800x480: centrado letterbox */
+  @media (max-width: 799px), (max-height: 479px) {
+    .frame { transform: scale(.9); }
+  }
+  
+	  /* Frases: 8 spans superpuestos, uno visible por vez */
+	.phrases {
+	  flex: 1;
+	  min-width: 0;
+	  white-space: nowrap;
+	  overflow: hidden;
+	  text-overflow: ellipsis;
+	  position: relative;
+	  min-height: 1.2em; /* reserva alto para que no salte */
+	  font-size: 14px;
+	  letter-spacing: 0.3px;
+	  opacity: 0.95;
+	  text-shadow: 0 0 6px rgba(255,255,255,0.15);
+	  line-height: 1.35;
+	}
+	.phrases span {
+	  position: absolute;
+	  left: 0; top: 0;
+	  right: 0;
+	  opacity: 0;
+	  /* steps(1) para “salto” limpio de una frase a la otra */
+	  animation: phrases-rotate var(--boot-duration) steps(1, end) infinite;
+	}
+
+	/* 8 frases = dividimos la duración total en octavos */
+	.phrases span:nth-child(1) { animation-delay: 0s; }
+	.phrases span:nth-child(2) { animation-delay: calc(var(--boot-duration) * 1/8); }
+	.phrases span:nth-child(3) { animation-delay: calc(var(--boot-duration) * 2/8); }
+	.phrases span:nth-child(4) { animation-delay: calc(var(--boot-duration) * 3/8); }
+	.phrases span:nth-child(5) { animation-delay: calc(var(--boot-duration) * 4/8); }
+	.phrases span:nth-child(6) { animation-delay: calc(var(--boot-duration) * 5/8); }
+	.phrases span:nth-child(7) { animation-delay: calc(var(--boot-duration) * 6/8); }
+	.phrases span:nth-child(8) { animation-delay: calc(var(--boot-duration) * 7/8); }
+
+	@keyframes phrases-rotate {
+	  0%   { opacity: 1; }
+	  12.49% { opacity: 1; }
+	  12.5%  { opacity: 0; }
+	  100% { opacity: 0; }
+	}
+
+	/* Timer: micro toggle de opacidad para forzar repaint en la Pi */
+	#timer { transition: opacity .05s linear; }
+	#timer.tick { opacity: .999; }
+ 
+</style>
+
+<div class="stage">
+  <div class="frame">
+    <div class="topnote">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="dot"></div>
+        <div>Inicializando TVArgenta</div>
+      </div>
+      <div id="timer">00s</div>
+    </div>
+
+    <img src="file:///srv/tvargenta/Splash/splash_2.png" alt="TVArgenta Boot">
+
+    <div class="overlay">
+      <div class="row">
+        <div class="spin" aria-hidden="true"></div>
+        <div class="phrases">
+		  <span>Cargando programas…</span>
+		  <span>Chequeando tags…</span>
+		  <span>Preparando experiencia argenta…</span>
+		  <span>Afinando el sintonizador…</span>
+		  <span>Calentando los tubos del CRT…</span>
+		  <span>Buscando perlitas noventosas…</span>
+		  <span>Acomodando el tracking del VHS…</span>
+		  <span>Puliendo el brillo y el contraste…</span>
+		</div>
+      </div>
+      <div class="bar" aria-label="Progreso de arranque" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="fill" id="fill"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const DUR_TOTAL_MS   = 25000;
+  const PING_INTERVAL_MS = 2000;  // cada 2s basta para el WD
+  const START = performance.now();
+
+  const timerEl  = document.getElementById('timer');
+  const fillEl   = document.getElementById('fill');
+  const barEl    = fillEl.parentElement;
+
+  // --- PING al watchdog desde el preloader (robusto) ---
+  function wdPing(){
+    try {
+      // 1) intento con sendBeacon (ideal para fire-and-forget)
+      if (navigator.sendBeacon) {
+        const ok = navigator.sendBeacon('http://127.0.0.1:5000/api/kiosk_ping?src=boot_preloader');
+        if (ok) return;
+      }
+      // 2) fallback con GET no bloqueante usando Image()
+      const img = new Image();
+      img.src = 'http://127.0.0.1:5000/api/kiosk_ping?src=boot_preloader&_=' + Date.now();
+    } catch(e) { /* ignorar */ }
+  }
+
+  // UI loop (timer + aria)
+  let rafId = 0;
+  function frame(){
+    const elapsed = performance.now() - START;
+
+    // Timer visible + micro repaint
+    const secs = Math.min(Math.round(elapsed/1000), Math.round(DUR_TOTAL_MS/1000));
+    if (timerEl) {
+      timerEl.textContent = String(secs).padStart(2,'0') + "s";
+      timerEl.classList.toggle('tick');
+    }
+
+    // aria de la barra (la barra visual va por CSS)
+    const pct = Math.max(0, Math.min(100, Math.round((elapsed / DUR_TOTAL_MS) * 100)));
+    barEl.setAttribute('aria-valuenow', pct);
+
+    rafId = requestAnimationFrame(frame);
+  }
+
+  // Arrancamos
+  rafId = requestAnimationFrame(frame);
+
+  // 🔔 Avisá al WD que el frontend VIVE (inmediato + intervalo)
+  wdPing();
+  const wdInt = setInterval(wdPing, PING_INTERVAL_MS);
+
+  // Vamos a /splash cuando el backend responda
+  let jumped = false;
+  const go = () => {
+    if (jumped) return;
+    jumped = true;
+    clearInterval(wdInt);
+    setTimeout(() => location.replace('http://localhost:5000/splash'), 80);
+  };
+
+  // Probo conexión al backend (un solo ok y salimos)
+  async function probe(){
+    try {
+      await fetch('http://127.0.0.1:5000/', { cache: 'no-store', mode: 'no-cors', keepalive: true });
+      go();
+    } catch(e) { /* seguir intentando */ }
+  }
+  const pingInt = setInterval(probe, 600);
+  probe(); // primer intento ya
+
+  // Fallback por tiempo total
+  const fall = setTimeout(go, DUR_TOTAL_MS);
+
+  // Limpieza
+  window.addEventListener('beforeunload', () => {
+    cancelAnimationFrame(rafId);
+    clearInterval(wdInt);
+    clearInterval(pingInt);
+    clearTimeout(fall);
+  });
+})();
+</script>

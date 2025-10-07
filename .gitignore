@@ -1,0 +1,49 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+*.env
+*.env.*
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+
+# =========================
+# Builds / Artifacts
+# =========================
+dist/
+build/
+
+# =========================
+# App data (runtime)
+# Mantener SOLO la estructura vacía de content/ y subcarpetas.
+# Ignorar todo lo demás (JSON, MP4, JPG, etc.)
+# =========================
+content/**
+!content/.gitignore
+!content/.gitkeep
+!content/**/
+!content/**/.gitkeep
+
+# (Si en el futuro quisieras permitir samples:)
+# !content/*.sample.json
+
+# =========================
+# Node / Frontend
+# =========================
+node_modules/

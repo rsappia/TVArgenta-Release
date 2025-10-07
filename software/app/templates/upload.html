@@ -1,0 +1,145 @@
+<!-- SPDX-License-Identifier: LicenseRef-TVArgenta-NC-Attribution-Consult-First
+     Proyecto: TVArgenta — Retro TV | Autor: Ricardo Sappia (rsflightronics@gmail.com)
+     © 2025. No comercial, atribución y consulta previa. TAL CUAL, sin garantías.
+     Ver LICENSE para términos completos.
+-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Subir videos - TVArgenta</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .marquee-bar {
+      height: 8px;
+      background: repeating-linear-gradient(
+        45deg,
+        #facc15,
+        #facc15 10px,
+        #000 10px,
+        #000 20px
+      );
+      background-size: 40px 100%;
+      animation: marquee 0.5s linear infinite;
+    }
+
+    @keyframes marquee {
+      from {
+        background-position: 0 0;
+      }
+      to {
+        background-position: 40px 0;
+      }
+    }
+  </style>
+</head>
+<body class="bg-black text-white font-mono min-h-screen">
+  <div class="max-w-2xl mx-auto py-8 px-4">
+    <h1 class="text-3xl font-bold text-yellow-400 mb-6 text-center">📤 Subir videos a TVArgenta</h1>
+
+    <!-- Mensaje de estado -->
+    {% if request.args.get("ok") %}
+    <div class="bg-green-600 text-white text-center font-bold py-2 mb-4 rounded">
+      ✅ Videos subidos correctamente
+    </div>
+    {% elif request.args.get("error") == "hevc" %}
+    <div class="bg-red-600 text-white text-center font-bold py-2 mb-4 rounded">
+      ❌ El video usa un códec no compatible (HEVC/H.265)
+    </div>
+    {% elif request.args.get("error") %}
+    <div class="bg-red-600 text-white text-center font-bold py-2 mb-4 rounded">
+      ⚠️ {{ request.args.get("error") }}
+    </div>
+    {% endif %}
+
+    <!-- Estado de procesamiento -->
+    <div id="uploadStatusBox" class="bg-gray-700 text-yellow-300 font-bold py-2 px-4 rounded mb-4 hidden"></div>
+
+    <!-- Barrita animada -->
+    <div id="loadingBar" class="hidden mb-4 marquee-bar rounded overflow-hidden"></div>
+
+    <!-- Formulario -->
+    <form id="uploadForm" method="POST" action="/upload" enctype="multipart/form-data"
+          class="border-2 border-dashed border-yellow-500 rounded-lg p-6 bg-gray-800 text-center relative"
+          ondrop="handleDrop(event)" ondragover="event.preventDefault()">
+
+      <label for="fileInput" class="block cursor-pointer text-yellow-300 mb-4">
+        Arrastrá los archivos .mp4 o hacé clic para seleccionarlos
+      </label>
+
+      <input type="file" id="fileInput" name="videos[]" accept=".mp4" multiple class="hidden"
+             onchange="updateFileList(this.files)">
+      
+      <div id="fileList" class="text-sm text-gray-400 mt-2 italic">Ningún archivo seleccionado.</div>
+
+      <button type="submit"
+              class="mt-6 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded">
+        Subir videos
+      </button>
+    </form>
+
+    <div class="mt-8 text-center">
+      <a href="{{ url_for('index') }}" class="text-blue-400 underline">⬅ Volver al inicio</a>
+    </div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const fileList = document.getElementById("fileList");
+    const form = document.getElementById("uploadForm");
+    const loadingBar = document.getElementById("loadingBar");
+    const statusBox = document.getElementById("uploadStatusBox");
+
+    let polling = false;
+
+    form.addEventListener("click", (e) => {
+      if (fileInput.files.length === 0) {
+        fileInput.click();
+      }
+    });
+
+    form.addEventListener("submit", () => {
+      loadingBar.classList.remove("hidden");
+      statusBox.classList.remove("hidden");
+      startStatusPolling();
+    });
+
+    function updateFileList(files) {
+      if (files.length === 0) {
+        fileList.textContent = "Ningún archivo seleccionado.";
+        return;
+      }
+      let list = Array.from(files)
+        .map(file => `• ${file.name}`)
+        .join("<br>");
+      fileList.innerHTML = list;
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      fileInput.files = e.dataTransfer.files;
+      updateFileList(e.dataTransfer.files);
+    }
+
+    function startStatusPolling() {
+      if (polling) return;
+      polling = true;
+      const interval = setInterval(() => {
+        fetch("/upload_status")
+          .then(res => res.text())
+          .then(text => {
+            statusBox.textContent = text;
+            if (text.includes("¡Listo")) {
+              clearInterval(interval);
+              setTimeout(() => location.href = "/", 1500);
+            }
+          });
+      }, 1500);
+    }
+
+    window.addEventListener("dragover", e => e.preventDefault());
+    window.addEventListener("drop", e => e.preventDefault());
+  </script>
+</body>
+</html>
