@@ -1,5 +1,5 @@
 <p align="right">
-  <a href="[https://github.com/tu_usuario/tvargenta/blob/main/README_EN.md](https://github.com/rsappia/TVArgenta-Release/blob/main/README.en.md)" style="
+  <a href="[[https://github.com/tu_usuario/tvargenta/blob/main/README_EN.md](https://github.com/rsappia/TVArgenta-Release/blob/main/README.en.md)](https://github.com/rsappia/TVArgenta-Release/blob/main/README.en.md)" style="
     background-color:#0078d7;
     color:white;
     padding:6px 14px;
