@@ -1,5 +1,20 @@
+<p align="right">
+  <a href="[https://github.com/tu_usuario/tvargenta/blob/main/README_EN.md](https://github.com/rsappia/TVArgenta-Release/blob/main/README.en.md)" style="
+    background-color:#0078d7;
+    color:white;
+    padding:6px 14px;
+    text-decoration:none;
+    border-radius:6px;
+    font-weight:bold;
+    font-family:sans-serif;
+  ">
+    🇬🇧 Read in English
+  </a>
+</p>
+
 # TVArgenta---Retro-TV
 TVArgenta es una TV retro hecha con Raspberry Pi que revive la experiencia de hacer zapping entre publicidades y contenido offline. Incluye un backend local para gestionar videos, canales y metadatos, todo dentro de una carcasa 3D impresa.
+
 
 # Primera parte: Configuracion basica de la Raspberry Pi
 
