@@ -8,23 +8,25 @@ We prepare the SD card (in this case, I’m using a 64 GB one).
 For that, we use Raspberry Pi Imager.
 Make sure to select the following options:
 
-<img width="683" height="320" alt="GetImage" src="https://github.com/user-attachments/assets/71449feb-c97a-4f45-8db5-989e46ec4489" />
+<img width="683" height="320" alt="GetImage" src="https://github.com/user-attachments/assets/aa09a287-0f3b-446d-a764-79605f50f50e" />
 
 In the hostname field, I make sure to set argentv.local (we’ll use it later, but you can choose any hostname you like).
 
-<img width="516" height="98" alt="GetImage(1)" src="https://github.com/user-attachments/assets/ed7ae1b7-f9fa-4088-97f8-4d550d3298d6" />
+<img width="516" height="98" alt="GetImage(1)" src="https://github.com/user-attachments/assets/0259456c-d82c-46b3-af1d-be7583b34bde" />
 
 Make sure to configure the Wi-Fi credentials, language, and region.
 Leave SSH enabled so you can access the Raspberry Pi remotely later on:
 
-<img width="532" height="341" alt="GetImage(2)" src="https://github.com/user-attachments/assets/2db92e9c-3a0c-4588-ae73-04a006b02310" />
+<img width="532" height="341" alt="GetImage(2)" src="https://github.com/user-attachments/assets/949f2aac-8162-4193-9738-f84d95144d0f" />
 
 Click Install, and we’ll meet again in a few minutes 😉
 […]
 Once the flashing process is done, insert the SD card into the Raspberry Pi.
 If you see the following screens, you’re on the right track:
 
-<img width="916" height="660" alt="GetImage(3)" src="https://github.com/user-attachments/assets/fb1c9e5d-ed64-4b4a-8d6a-49a96241ab09" /> <img width="893" height="584" alt="GetImage(4)" src="https://github.com/user-attachments/assets/27b006af-634a-4407-8305-b08e9cbbef18" />
+<img width="916" height="660" alt="GetImage(3)" src="https://github.com/user-attachments/assets/32d95c7d-202e-4d88-b238-08b752fa1662" />
+
+<img width="893" height="584" alt="GetImage(4)" src="https://github.com/user-attachments/assets/6bbc4965-9e22-46e6-9d14-69f55224ef5f" />
 
 Next, we’ll try to access the Raspberry Pi remotely.
 Open your command console and type:
@@ -32,18 +34,17 @@ Open your command console and type:
 ssh argentv.local
 
 You might see the following message:
-
-<img width="688" height="245" alt="GetImage(5)" src="https://github.com/user-attachments/assets/b8f6b68c-e219-46e8-8b86-d9ac209fcbbd" />
+<img width="688" height="245" alt="GetImage(5)" src="https://github.com/user-attachments/assets/33ae5eb5-0f7b-4cea-a7e9-fd71d36787e5" />
 
 If that happens, try this:
 
-ssh-keygen -R argentv.local
+`ssh-keygen -R argentv.local`
 
-<img width="551" height="113" alt="GetImage(6)" src="https://github.com/user-attachments/assets/79f8c030-8a48-4163-90bd-4815fb365669" />
+<img width="551" height="113" alt="GetImage(6)" src="https://github.com/user-attachments/assets/3e24967a-1ba1-44b9-8a79-5bd007d71a1b" />
 
 Once done, try again with ssh argentv.local, and this time you should see something like this:
 
-<img width="842" height="262" alt="GetImage(7)" src="https://github.com/user-attachments/assets/6aed27de-c5a3-4c33-9fc8-56bec1065421" />
+<img width="842" height="262" alt="GetImage(7)" src="https://github.com/user-attachments/assets/e2def0f8-fb5e-4c8f-9d6c-fb658fdf6e69" />
 
 After typing yes, new certificates will be installed, and the SSH connection to the Raspberry Pi will be established.
 
@@ -94,7 +95,7 @@ cd /srv
 git clone git@github.com:rsappia/TVArgenta---Retro-TV.git tvargenta
 cd /srv/tvargenta
 ```
-<img width="729" height="202" alt="GetImage(8)" src="https://github.com/user-attachments/assets/67f7129d-25c5-4643-bff6-c400c3e3e00e" />
+<img width="729" height="202" alt="GetImage(8)" src="https://github.com/user-attachments/assets/28d59e5f-dd75-451f-a5ad-3bd34a4ce57b" />
 
 ## Install system and project dependencies
 
@@ -118,7 +119,7 @@ Once there, run the compiler:
 
 If everything goes well, you should now see the compiled .bin file next to the .c one:
 
-<img width="488" height="38" alt="GetImage(9)" src="https://github.com/user-attachments/assets/a3ee3968-8d51-42f3-9fc6-97d0212d373b" />
+<img width="488" height="38" alt="GetImage(9)" src="https://github.com/user-attachments/assets/15f96bbc-3f7a-4fe5-aab7-132335df9cc2" />
 
 Now let’s set the proper permissions:
 ```
@@ -146,10 +147,19 @@ You can use the videos already included in:
 
 These come by default in the GitHub repo.
 
-![TVArgenta first load](https://github.com/rsappia/TVArgenta---Retro-TV/blob/main/docs/TVArgenta_first_load.gif)
+![TVArgenta first load](https://github.com/rsappia/TVArgenta-Release/blob/main/docs/TVArgenta_first_load.gif)
 
 With this, you’re already good to go and play around.
 In the next chapter, I’ll cover audio configuration, and in a third one, everything related to the hardware itself.
 
-<p align="center"> <em>If this project brought you a smile or inspired you to build something of your own,<br> buy me a coffee and let’s keep making Argentinian magic ☕🇦🇷</em> </p> <p align="center"> <a href="https://paypal.me/RicardoSappia/5" target="_blank"> <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200"> </a> </p> ---
+<p align="center"> 
+    <em>If this project brought you a smile or inspired you to build something of your own,<br>
+    buy me a coffee and let’s keep making Argentinian magic ☕🇦🇷</em> 
+</p> 
+
+<p align="center"> 
+    <a href="https://paypal.me/RicardoSappia/5" target="_blank"> 
+        <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200"> 
+    </a> 
+</p> ---
 
