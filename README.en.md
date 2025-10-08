@@ -153,8 +153,8 @@ With this, you’re already good to go and play around.
 In the next chapter, I’ll cover audio configuration, and in a third one, everything related to the hardware itself.
 
 <p align="center"> 
-    <em>If this project brought you a smile or inspired you to build something of your own,<br>
-    buy me a coffee and let’s keep making Argentinian magic ☕🇦🇷</em> 
+    <em>If you enjoyed this project or got inspired to make your own,<br>
+    a coffee would help me keep creating cool stuff ☕</em> 
 </p> 
 
 <p align="center"> 
