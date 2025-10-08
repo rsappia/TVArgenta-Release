@@ -7,7 +7,7 @@ Preparamos la tarjeta SD en este caso uso una de 64Gb.
 Para eso usamos Raspberry Pi Imager 
 Asegurarse de elegir lo siguiente:
 
-<img width="683" height="320" alt="GetImage" src="https://github.com/user-attachments/assets/71449feb-c97a-4f45-8db5-989e46ec4489" />
+<img width="516" height="98" alt="GetImage(1)" src="https://github.com/user-attachments/assets/0e5f1ac6-0984-432c-be08-1437c1fbc2ae" />
 
 En el hostname me aseguro de q poner argentv.local (lo vamos a usar mas adelante, pero pueden ponerle el hostname que quieran) 
 
