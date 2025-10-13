@@ -1,3 +1,5 @@
+<p align="center"> <em>If this project made you smile or inspired you to build something of your own, you can buy me a coffee and help me keep creating cool stuff ☕✨</em> </p> <p align="center"> <a href="https://paypal.me/RicardoSappia/5" target="_blank"> <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200"> </a> </p> ---
+
 # TVArgenta---Retro-TV
 
 TVArgenta is a retro-style TV built with a Raspberry Pi that brings back the experience of channel surfing between commercials and offline content. It includes a local backend to manage videos, channels, and metadata — all inside a 3D-printed case.
