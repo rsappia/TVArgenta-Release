@@ -1,5 +1,32 @@
+<p align="right">
+  <a href="https://github.com/rsappia/TVArgenta-Release/blob/main/README.en.md" style="
+    background-color:#0078d7;
+    color:white;
+    padding:6px 14px;
+    text-decoration:none;
+    border-radius:6px;
+    font-weight:bold;
+    font-family:sans-serif;
+  ">
+    🇬🇧 Read in English
+  </a>
+</p>
+
+
+<p align="center">
+  <em>Si te trajo una sonrisa o te inspiró a crear algo propio,<br>
+  convidame un cafecito y apoyar futuros proyectos ☕🇦🇷</em>
+</p>
+
+<p align="center">
+  <a href="https://paypal.me/RicardoSappia/5" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200">
+  </a>
+</p>
+
 # TVArgenta---Retro-TV
 TVArgenta es una TV retro hecha con Raspberry Pi que revive la experiencia de hacer zapping entre publicidades y contenido offline. Incluye un backend local para gestionar videos, canales y metadatos, todo dentro de una carcasa 3D impresa.
+
 
 # Primera parte: Configuracion basica de la Raspberry Pi
 
@@ -7,41 +34,40 @@ Preparamos la tarjeta SD en este caso uso una de 64Gb.
 Para eso usamos Raspberry Pi Imager 
 Asegurarse de elegir lo siguiente:
 
-<img width="683" height="320" alt="GetImage" src="https://github.com/user-attachments/assets/71449feb-c97a-4f45-8db5-989e46ec4489" />
+<img width="683" height="320" alt="GetImage" src="https://github.com/user-attachments/assets/aa09a287-0f3b-446d-a764-79605f50f50e" />
 
 En el hostname me aseguro de q poner argentv.local (lo vamos a usar mas adelante, pero pueden ponerle el hostname que quieran) 
 
-<img width="516" height="98" alt="GetImage(1)" src="https://github.com/user-attachments/assets/ed7ae1b7-f9fa-4088-97f8-4d550d3298d6" />
+<img width="516" height="98" alt="GetImage(1)" src="https://github.com/user-attachments/assets/0259456c-d82c-46b3-af1d-be7583b34bde" />
 
 Asegurarse de configurar las credenciales de conexion a WIFI, idioma y region. 
 Dejar activado SSH para poder acceder luego a la raspberry en forma remota: 
 
-<img width="532" height="341" alt="GetImage(2)" src="https://github.com/user-attachments/assets/2db92e9c-3a0c-4588-ae73-04a006b02310" />
+<img width="532" height="341" alt="GetImage(2)" src="https://github.com/user-attachments/assets/949f2aac-8162-4193-9738-f84d95144d0f" />
 
 Darle a instalar, nos vemos en unos minutos 😉 
 [...]
 Una vez que termina el proceso de flasheo, insertamos la tarjeta SD en la raspberry pi y si vemos lo siguiente vamos por buen camino: 
-<img width="916" height="660" alt="GetImage(3)" src="https://github.com/user-attachments/assets/fb1c9e5d-ed64-4b4a-8d6a-49a96241ab09" />
+<img width="916" height="660" alt="GetImage(3)" src="https://github.com/user-attachments/assets/32d95c7d-202e-4d88-b238-08b752fa1662" />
 
-<img width="893" height="584" alt="GetImage(4)" src="https://github.com/user-attachments/assets/27b006af-634a-4407-8305-b08e9cbbef18" />
+<img width="893" height="584" alt="GetImage(4)" src="https://github.com/user-attachments/assets/6bbc4965-9e22-46e6-9d14-69f55224ef5f" />
 
 A continuacion, vamos a intentar acceder a la raspberry en forma remota. Para eso abrimos la consola de comando y tipeamos lo siguiente: 
 
 `ssh argentv.local`
 
 Puede ser que el siguiente mensaje nos aparezca: 
-
-<img width="688" height="245" alt="GetImage(5)" src="https://github.com/user-attachments/assets/b8f6b68c-e219-46e8-8b86-d9ac209fcbbd" />
+<img width="688" height="245" alt="GetImage(5)" src="https://github.com/user-attachments/assets/33ae5eb5-0f7b-4cea-a7e9-fd71d36787e5" />
 
 Si llegara a suceder, probamos lo siguiente: 
 
 `ssh-keygen -R argentv.local`
 
- <img width="551" height="113" alt="GetImage(6)" src="https://github.com/user-attachments/assets/79f8c030-8a48-4163-90bd-4815fb365669" />
+<img width="551" height="113" alt="GetImage(6)" src="https://github.com/user-attachments/assets/3e24967a-1ba1-44b9-8a79-5bd007d71a1b" />
 
 Una vez hecho esto, volvemos a probar con ssh argentv.local y esta vez deberia mostrar lo siguiente: 
 
-<img width="842" height="262" alt="GetImage(7)" src="https://github.com/user-attachments/assets/6aed27de-c5a3-4c33-9fc8-56bec1065421" />
+<img width="842" height="262" alt="GetImage(7)" src="https://github.com/user-attachments/assets/e2def0f8-fb5e-4c8f-9d6c-fb658fdf6e69" />
 
 Despues de escribir `yes` como opcion, se instalan los nuevos certificados y se establece la conexion con la raspberry pi via SSH.  
 
@@ -57,8 +83,7 @@ Ahora pasamos a clonar el repo en github. Antes es necesario configurar nuestras
 ### 1) Si ya tenés claves, salteá este paso 
 
 `ls -l ~/.ssh/id_ed25519 ~/.ssh/id_ed25519.pub 2>/dev/null || true `
-
-  
+ 
 
 ### 2) Generar una clave nueva (ED25519). Elegí un comentario útil: 
 
@@ -101,7 +126,7 @@ cd /srv
 git clone git@github.com:rsappia/TVArgenta---Retro-TV.git tvargenta 
 cd /srv/tvargenta
 ```
- <img width="729" height="202" alt="GetImage(8)" src="https://github.com/user-attachments/assets/67f7129d-25c5-4643-bff6-c400c3e3e00e" />
+<img width="729" height="202" alt="GetImage(8)" src="https://github.com/user-attachments/assets/28d59e5f-dd75-451f-a5ad-3bd34a4ce57b" />
 
 ##Instalar dependencias del sistema y del proyecto 
 Ejecutamos:
@@ -133,7 +158,7 @@ Una vez ahi, largamos el compilador.
 
 Si sale todo bien, deberia apraecer ahora el .bin compilado junto con el .c 
 
- <img width="488" height="38" alt="GetImage(9)" src="https://github.com/user-attachments/assets/a3ee3968-8d51-42f3-9fc6-97d0212d373b" />
+<img width="488" height="38" alt="GetImage(9)" src="https://github.com/user-attachments/assets/15f96bbc-3f7a-4fe5-aab7-132335df9cc2" />
 
 A continuacion ajustamos los permisos necesarios:  
 ```
@@ -158,11 +183,9 @@ Para eso, se pueden usar directamente los videos disponibles en :
 
 Estos viene por defecto en el repo de github.  
 
-![TVArgenta first load](https://github.com/rsappia/TVArgenta---Retro-TV/blob/main/docs/TVArgenta_first_load.gif)
+![TVArgenta first load](https://github.com/rsappia/TVArgenta-Release/blob/main/docs/TVArgenta_first_load.gif)
 
- 
 Whit this, you are already good to go an play around. I will be posting on the next chapter about audio configuration and on a third one all related to the hardware itself.
-
 
 <hr>
 
