@@ -123,7 +123,7 @@ Asegurate que /srv exista (ya existe) y dale ownership a tu usuario (nuevamente 
 
 ```
 cd /srv 
-git clone git@github.com:rsappia/TVArgenta---Retro-TV.git tvargenta 
+git clone git@github.com:rsappia/TVArgenta-Release.git tvargenta 
 cd /srv/tvargenta
 ```
 <img width="729" height="202" alt="GetImage(8)" src="https://github.com/user-attachments/assets/28d59e5f-dd75-451f-a5ad-3bd34a4ce57b" />
