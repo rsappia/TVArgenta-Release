@@ -94,7 +94,7 @@ Now let’s prepare the directory where we’ll clone the repository.
 Make sure /srv exists (it usually does) and give ownership to your user (again, my username is rs, but replace it with yours):
 ```
 cd /srv
-git clone git@github.com:rsappia/TVArgenta---Retro-TV.git tvargenta
+git clone git@github.com:rsappia/TVArgenta-Release.git tvargenta
 cd /srv/tvargenta
 ```
 <img width="729" height="202" alt="GetImage(8)" src="https://github.com/user-attachments/assets/28d59e5f-dd75-451f-a5ad-3bd34a4ce57b" />
