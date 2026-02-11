@@ -4,6 +4,19 @@
 
 TVArgenta is a retro-style TV built with a Raspberry Pi that brings back the experience of channel surfing between commercials and offline content. It includes a local backend to manage videos, channels, and metadata — all inside a 3D-printed case.
 
+#  ⚠️ Hardware Compatibility Notice
+
+This image is designed and tested specifically for the original reference hardware configuration:
+- DSI display
+- I2S DAC audio output
+- Rotary encoder for control
+
+The system is tightly integrated around this setup.
+
+If you choose to use alternative hardware (HDMI display, analog jack, USB audio devices, keyboard instead of encoder, etc.), functionality may differ. In those cases, additional system configuration may be required.
+
+Please note that I cannot guarantee correct operation outside the reference hardware configuration.
+
 -------------------------------------------------------------
 # TVArgenta v2.0 — Major Update
 
