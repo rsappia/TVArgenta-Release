@@ -27,6 +27,21 @@
 # TVArgenta---Retro-TV
 TVArgenta es una TV retro hecha con Raspberry Pi que revive la experiencia de hacer zapping entre publicidades y contenido offline. Incluye un backend local para gestionar videos, canales y metadatos, todo dentro de una carcasa 3D impresa.
 
+Claro, acá tenés una versión en español, profesional y clara:
+
+# ⚠️ Aviso de Compatibilidad de Hardware
+
+Esta imagen fue diseñada y probada específicamente para la configuración de hardware de referencia original:
+- Pantalla DSI
+- Salida de audio mediante DAC I2S
+- Control mediante encoder rotativo
+
+El sistema está fuertemente integrado en torno a esta configuración.
+
+Si se utilizan componentes de hardware alternativos (pantalla HDMI, salida de audio por jack analógico, dispositivos de audio USB, teclado en lugar de encoder, etc.), el funcionamiento puede variar. En esos casos, puede ser necesario realizar ajustes adicionales en la configuración del sistema.
+
+No puedo garantizar el funcionamiento correcto fuera de la configuración de hardware de referencia.
+
 -------------------------------------------------------------
 # TVArgenta v2.0 — Gran Actualización
 
